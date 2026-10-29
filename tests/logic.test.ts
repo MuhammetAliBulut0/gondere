@@ -121,3 +121,13 @@ test('isim doğrulama', () => {
   const i = validateCitizenName('ismail IŞIK');
   assert.ok(i.ok && i.display === 'İsmail Işık', JSON.stringify(i));
 });
+
+test('kahraman listesi: kimlikler benzersiz, açık kayıtların kaynağı var', async () => {
+  const { HEROES } = await import('../lib/heroes.ts');
+  const ids = HEROES.map((h) => h.id);
+  assert.equal(new Set(ids).size, ids.length, 'yinelenen kimlik var');
+  for (const h of HEROES.filter((x) => x.enabled)) {
+    assert.ok(h.sourceUrl.startsWith('http'), `${h.id} kaynaksız`);
+    assert.ok(h.displayName && h.event && h.description, `${h.id} eksik alan`);
+  }
+});

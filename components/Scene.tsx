@@ -53,7 +53,8 @@ function plaqueMeta(b: Block): string {
   if (b.type === 'hero') {
     if (!b.hero) return '';
     const year = b.hero.event.match(/\b(1\d{3}|20\d{2})\b/g)?.at(-1) ?? b.hero.event;
-    return `${b.hero.category === 'KAHRAMAN' ? 'Kahraman' : 'Şehit'}, ${year}`;
+    const kind = b.hero.category === 'KAHRAMAN' ? 'Kahraman' : b.hero.category === 'KOMUTAN' ? 'Komutan' : 'Şehit';
+    return `${kind}, ${year}`;
   }
   if (b.type === 'ata') return b.form?.period ?? '';
   if (b.type === 'ataFinal') return 'Ulu Önderimiz';
