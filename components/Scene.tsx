@@ -262,6 +262,9 @@ export function Scene() {
             <h1>{SITE.title}</h1>
             <p className="subtitle">{SITE.subtitle}</p>
             <p className="explain">Direğe kazınan her isim bayrağımızı biraz daha yukarı taşır.</p>
+            {ready && totalCm === 0 && (
+              <p className="empty-note">Bayrağımız henüz göndere çekilmedi. İlk ismi siz kazıyın, bayrağımız yükselmeye başlasın.</p>
+            )}
           </div>
 
           {CLOUDS.filter((c) => c.m * 100 < totalCm && cmToPx(c.m * 100) > fromPx && cmToPx(c.m * 100) < toPx).map((c) => (
@@ -324,11 +327,6 @@ export function Scene() {
           ) : (
             <>
               <div className="folded-flag" style={{ bottom: BASE }} role="img" aria-label="Katlanmış Türk Bayrağı" />
-              {ready && (
-                <p className="empty-note" style={{ bottom: BASE + HOIST + 44 }}>
-                  Bayrağımız henüz göndere çekilmedi. İlk ismi siz kazıyın, bayrağımız yükselmeye başlasın.
-                </p>
-              )}
             </>
           )}
 
@@ -411,8 +409,8 @@ function Bunting({ width }: { width: number }) {
       <polygon
         key={k}
         points={`${x0},${y(x0)} ${x1},${y(x1)} ${xm},${y(xm) + 26}`}
-        fill={k % 2 === 0 ? '#e30a17' : '#ffffff'}
-        stroke={k % 2 === 0 ? '#b5000d' : '#e3e5ea'}
+        fill={k % 2 === 0 ? '#a8101a' : '#ffffff'}
+        stroke={k % 2 === 0 ? '#7e0a12' : '#e3e5ea'}
         strokeWidth="1"
       />
     );

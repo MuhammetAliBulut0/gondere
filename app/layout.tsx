@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import '@fontsource/barlow-semi-condensed/800.css';
 import '@fontsource/barlow-condensed/600.css';
 import '@fontsource/barlow-condensed/700.css';
 import '@fontsource/barlow-condensed/800.css';
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#e30a17',
+  themeColor: '#a8101a',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
