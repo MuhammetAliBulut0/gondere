@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLive } from '@/lib/client/useLive.ts';
-import { buildLayout, cmToPx, visibleRange, type Block } from '@/lib/client/layout.ts';
+import { buildPreview, readPreviewMeters } from '@/lib/client/preview.ts';
+import { buildLayout, cmToPx, labelCenterPx, visibleRange, type Block } from '@/lib/client/layout.ts';
 import { CITIZEN_COLLECTIVE_NAME, MILESTONES, PX_PER_M, SITE } from '@/lib/config.ts';
 import { cmToMetersText, formatInt } from '@/lib/normalize.ts';
 import { ATATURK_29_MESSAGE } from '@/lib/ataturk.ts';
@@ -16,7 +17,7 @@ import { Citizens } from './Citizens';
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 // Sahne ölçüleri (px)
-const GROUND = 120; // zemin şeridi
+const GROUND = 64; // zemin şeridi
 const PLINTH_H = 56;
 const BASE = GROUND + PLINTH_H - 6; // direğin kaideye oturduğu yükseklik
 const BUFFER = 700; // görünür alanın üstünde/altında önceden çizilecek pay
@@ -60,7 +61,15 @@ function plaqueMeta(b: Block): string {
 }
 
 export function Scene() {
-  const { meta, entries, status, errorText, refresh, applyEntry } = useLive();
+  const live = useLive();
+  // Test görünümü (?test=METRE): yalnızca bu tarayıcıda, uydurma kayıtlarla
+  const [previewM, setPreviewM] = useState<number | null>(null);
+  useEffect(() => setPreviewM(readPreviewMeters()), []);
+  const preview = useMemo(() => (previewM ? buildPreview(previewM) : null), [previewM]);
+  const meta = preview ? preview.meta : live.meta;
+  const entries = preview ? preview.entries : live.entries;
+  const status = preview ? 'ready' : live.status;
+  const { errorText, refresh, applyEntry } = live;
   const layout = useMemo(() => buildLayout(entries), [entries]);
 
   const [view, setView] = useState({ y: 0, h: 800, w: 400 });
@@ -90,9 +99,10 @@ export function Scene() {
   // Ölçüler
   const flagW = Math.round(Math.max(170, Math.min(300, view.w * 0.46)));
   const flagH = Math.round(flagW / 1.5);
-  const HOIST = flagH + 34;
   const totalCm = layout.totalCm;
   const polePx = cmToPx(totalCm);
+  // Direk kısayken bayrak, alttaki isim levhalarının üstüne binmesin diye biraz yukarıda durur
+  const HOIST = flagH + 34 + (totalCm > 0 ? Math.max(0, 140 - polePx) : 0);
   const stageH = Math.max(view.h, TOP_PAD + HOIST + polePx + BASE + 24);
   const flagDocTop = stageH - (BASE + polePx + HOIST) + 8;
 
@@ -253,6 +263,11 @@ export function Scene() {
       </header>
 
       {status === 'error' && <div className="status-banner">{errorText}</div>}
+      {preview && (
+        <div className="status-banner">
+          Test görünümü: {formatInt(previewM!)} m, uydurma kayıtlarla. Gerçek sayfa için adresteki ?test kısmını silin.
+        </div>
+      )}
 
       <main>
         <div className="stage" style={{ height: stageH }} aria-label="Bayrak direği">
@@ -293,7 +308,7 @@ export function Scene() {
           {visibleBlocks.map((b) => {
             const bottom = BASE + cmToPx(b.startCm);
             const h = cmToPx(b.cm);
-            const center = BASE + cmToPx(b.startCm + b.cm / 2);
+            const center = BASE + labelCenterPx(b);
             const hi = isHighlighted(b);
             const segClass = b.type === 'citizens' ? 'seg-citizens' : b.type === 'hero' ? 'seg-hero' : 'seg-gold';
             return (
@@ -359,7 +374,7 @@ export function Scene() {
         </button>
       )}
 
-      <div className="cta-bar">
+      <div className="cta-bar" hidden={!!preview}>
         <button className="btn btn-primary btn-big" onClick={() => openEntry()}>
           Bayrağı yükselt
         </button>

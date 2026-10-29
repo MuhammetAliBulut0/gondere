@@ -14,6 +14,12 @@ export type Block =
 
 export type Side = 'L' | 'R';
 
+/** Levhanın direkteki yüksekliği (px). Kaideye çarpmasın diye en alttakiler biraz yukarı itilir. */
+export function labelCenterPx(b: Block): number {
+  const raw = cmToPx(b.startCm + b.cm / 2);
+  return Math.max(raw, b.type === 'citizens' ? 36 : 62);
+}
+
 export interface PoleLayout {
   blocks: Block[];
   totalCm: number;
@@ -92,7 +98,7 @@ function placeLabels(blocks: Block[]) {
       b.label = true;
       continue;
     }
-    const center = cmToPx(b.startCm + b.cm / 2);
+    const center = labelCenterPx(b);
     const h = b.type === 'citizens' ? SMALL_LABEL_H : LABEL_H;
     const bottom = center - h / 2;
     const fits = (s: Side) => bottom >= lastTop[s] + 4;

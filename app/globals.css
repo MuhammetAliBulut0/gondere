@@ -1254,3 +1254,7 @@ dialog.sheet::backdrop {
     animation: none;
   }
 }
+
+.cta-bar[hidden] {
+  display: none;
+}
